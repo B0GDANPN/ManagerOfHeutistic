@@ -1,0 +1,63 @@
+\documentclass[12pt]{article}
+\input{Preambles/preamble.tex}
+\begin{document}
+\begin{flushleft}
+\section*{Описание Менеджера эвристик}
+Из сложности DPsize \cite{Moerkotte}:
+\begin{align*}
+    I^{\text{chain}}_{\text{DPsize}}(n) &=
+    \begin{cases}
+        \frac{1}{48} (5n^4 + 6n^3 - 14n^2 - 12n), & n \text{ even} \\
+        \frac{1}{48} (5n^4 + 6n^3 - 14n^2 - 6n + 11), & n \text{ odd}
+    \end{cases}
+    \\
+    I^{\text{cycle}}_{\text{DPsize}}(n) &=
+    \begin{cases}
+        \frac{1}{4} (n^4 - n^3 - n^2), & n \text{ even} \\
+        \frac{1}{4} (n^4 - n^3 - n^2 + n), & n \text{ odd}
+    \end{cases}
+    \\
+    I^{\text{star}}_{\text{DPsize}}(n) &=
+    \begin{cases}
+        2^{2n-4} - \frac{1}{4} \binom{2n}{n-1} + q(n), & n \text{ even} \\
+        2^{2n-4} - \frac{1}{4} \binom{2(n-1)}{(n-1)} + \frac{1}{4} \binom{(n-1)}{(n-1)/2} + q(n), & n \text{ odd}
+    \end{cases}
+    \\
+    \text{with } q(n) &= n 2^{2n-1} - 5 \times 2^{n-3} + \frac{1}{2} (2^n - 5n + 4)
+    \\
+    I^{\text{clique}}_{\text{DPsize}}(n) &=
+    \begin{cases}
+        2^{2n-2} - 5 \times 2^{n-2} + \frac{1}{4} \binom{2n}{n} - \frac{1}{4} \binom{n}{n/2} + 1, & n \text{ even} \\
+        2^{2n-2} - 5 \times 2^{n-2} + \frac{1}{4} \binom{2n}{n} + 1, & n \text{ odd}
+    \end{cases}
+\end{align*}
+
+Заметим, что полные графы \text{clique} обладают высокой алгоритмической сложностью планирования
+алгоритмом DPsize. Поэтому все полные графы от 4 и будем отдавать Geqo. Заметим, что также 
+звёзды обладают высокой сложностью. Их можно разбить на цепи по центральной вершине.
+Посмотрим на сложность планирования цепей и циклов: при количестве таблиц $\leqq 12$ сложность циклов не более чем в 2 раза 
+больше цепей. Таким образом, при количестве таблиц $\leqq 12$ в цепи|цикле будем применять стандартный DP, инчае Geqo.
+
+Пусть дан большой($\geqq 50$ таблиц) аналитический запрос с внутренними соединениями. Для его планирования будем выполнять 
+следующие шаги:
+\begin{enumerate}
+    \item Представим запрос в виде связного графа, иначе выполним шаги 2 - 4 для каждой связной компоненты графа и соединим 
+их декартовым произведение.
+    \item Разобьём граф топологии: сначала выделим \textbf{clique} (с 4+ вершинами), затем циклы, найдём звёзды и разобьём их на цепи.
+    \item Спланируем каждую топологию графа.
+    \item Алгоритмом \textbf{GOO \cite[стр. 108]{Thomas} \cite{Allam}} соберём все планы топологий в один план.
+    
+
+%    1. Представим запрос в виде связного графа, иначе выполним шаги 2 - 4 для каждой связной компоненты графа и соединим 
+%    ( проверка связности a и b делается как bool have_relevant_joinclause( PlannerInfo* root, RelOptInfo* a , RelOptInfo* b))
+%    их декартовым произведение ( метод void make_rels_by_clauseless_joins(PlannerInfo* root, RelOptInfo* a, ListCell* b)).
+%    2. Разобьём граф топологии: сначала выделим полные графы (от 4+ вершин), затем циклы, найдём звёзды и разобьём их на цепи.
+    3.Спланируем каждую топологию графа, описал выше как это сделать, получим RelOptInfo* для каждой топологии.
+
+\end{enumerate}
+\centering \bibliographystyle{alpha}
+\bibliography{Preambles/sources.bib}
+\raggedright
+
+\end{flushleft}
+\end{document}
